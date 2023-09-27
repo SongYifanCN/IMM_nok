@@ -42,6 +42,7 @@ this_is_deprecated
 #include <vector>
 #include <map>
 #include <deque>
+#include <dirent.h>
 using namespace std;
 typedef unsigned int uint;
 typedef unsigned char uint8;
@@ -286,7 +287,25 @@ class Timer
                 char t[100];
                 memset(t, 0, sizeof t);
                 sprintf(t,"Spend %s seconds on %s",s.c_str(), timeUsedDesc[i].c_str());
+
                 cout<< t << endl;
+            }
+        }
+        static void show(ofstream& log_stream)
+        {
+            INFO("########## Timer ##########");
+
+            for (int i=0;i<(int)timeUsed.size();i++) if (timeUsed[i]>0)
+            {
+                char str[100];
+                sprintf(str,"%.6lf",timeUsed[i]/TIMES_PER_SEC );
+                string s=str;
+                if ((int)s.size()<15) s=" "+s;
+                char t[100];
+                memset(t, 0, sizeof t);
+                sprintf(t,"Spend %s seconds on %s",s.c_str(), timeUsedDesc[i].c_str());
+
+                log_stream << t << endl;
             }
         }
         static void clearAll()
@@ -355,4 +374,30 @@ class OutputInfo
         cout<<"\e\[0;31mProgram version: " << __head_version << "\e[0m"<<endl;
     }
 };
+
+bool stob(string &s) {
+    if (s == "True" || s == "true") {
+        return true;
+    } else if (s == "False" || s == "false")
+        return false;
+}
+
+bool make_dir(string dir_path) {
+    bool ret = false;
+    DIR* cur_dir = nullptr;
+    cur_dir = opendir(dir_path.c_str());
+    if (cur_dir == NULL)
+    {
+        INFO("--- This path does not exist, creating ---");
+        ret = (mkdir(dir_path.c_str(), 0777) == 0);
+        if (!ret)   INFO("--- mkdir FAILED ---");
+        else INFO("--- mkdir success ---");
+    }
+    else {
+        ret = true;
+        INFO("--- This dir exists ---");
+        closedir(cur_dir);
+    }
+    return ret;
+}
 #endif //__HEAD_H__
