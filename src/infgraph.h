@@ -25,7 +25,8 @@ public:
 
     InfGraph(string folder, string graph_file): Graph(folder, graph_file)
     {
-        sfmt_init_gen_rand(&sfmtSeed , 95082);
+        // sfmt_init_gen_rand(&sfmtSeed , 95082);
+        // Will be initialized later
         init_hyper_graph();
         visit = vector<bool> (n);
         visit_mark = vector<int> (n);
@@ -45,7 +46,6 @@ public:
             exit(1);
         }
         //INFO("build_hyper_graph_r", R);
-
 
 
         int prevSize = hyperGT.size();
@@ -153,6 +153,22 @@ public:
         //cout << "Influence is " << influence <<endl;
 		return 1.0*influence / hyperGT.size();
 	}
+
+    double comp_inf_by_cov(int64 num_RRsets, const Argument & arg) {
+        ASSERT(this->seedSet.size() > 0);
+        this->init_hyper_graph();
+        this->build_hyper_graph_r(0, num_RRsets, arg);
+        vector<bool> vecBoolVst = std::vector<bool>(num_RRsets);
+		vector<bool> vecBoolSeed(this->n);
+		for (auto seed : this->seedSet) vecBoolSeed[seed] = true;
+        for (auto seed : this->seedSet) {
+            for (auto node : this->hyperG[seed]) {
+                vecBoolVst[node] = true;
+            }
+        }
+        return 1.0 * std::count(vecBoolVst.begin(), vecBoolVst.end(), true) * this->n / num_RRsets;
+    }
+
 
 };
 
